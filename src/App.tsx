@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { EXERCISES, SEED_ROUTINES, SEED_WORKOUTS, DEFAULT_SETTINGS } from "./data/seed";
+import { DEFAULT_SETTINGS } from "./data/seed";
 import type { Exercise, Routine, Workout, ActiveWorkout, Settings, View } from "./types";
 import { mkId } from "./lib/utils";
 import { C } from "./lib/constants";
@@ -51,9 +51,9 @@ function saveState(state: AppState) {
 
 const initialState: AppState = {
   user: null,
-  routines: SEED_ROUTINES,
-  workouts: SEED_WORKOUTS,
-  exercises: EXERCISES,
+  routines: [],
+  workouts: [],
+  exercises: [],
   activeWorkout: null,
   settings: DEFAULT_SETTINGS,
 };
