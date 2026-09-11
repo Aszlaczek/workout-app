@@ -10,7 +10,6 @@
     '''.env.example''',
     '''.env.local''',
     '''.gitleaks.toml''',
-    '''src/services/ai/__tests__/''',
   ]
 
 
