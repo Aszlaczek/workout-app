@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { C } from "../lib/constants";
+import { useI18n } from "../i18n";
 import { mkId } from "../lib/utils";
 import type { Exercise, Routine, RoutineExercise, View } from "../types";
 
@@ -23,7 +24,6 @@ function parseCommand(
 ): string {
   const cmd = raw.trim().toLowerCase();
 
-  // dodaj ćwiczenie
   const addEx = cmd.match(/^dodaj [ćc]wiczenie (.+)/);
   if (addEx) {
     const parts = addEx[1].split(" ");
@@ -42,7 +42,6 @@ function parseCommand(
     return `Dodano cwiczenie: ${ex.name} (${cat})`;
   }
 
-  // nowy trening
   const newW = cmd.match(/^nowy trening(?: (.+))?/);
   if (newW) {
     const query = newW[1]?.trim() ?? "";
@@ -52,31 +51,26 @@ function parseCommand(
     return `Rozpoczeto: ${routine.name}`;
   }
 
-  // dodaj serię
   const addSet = cmd.match(/^dodaj seri[eę] (\d+(?:[.,]\d+)?)[x\s×](\d+)/);
   if (addSet) {
     return `Dodano serie: ${addSet[1]}kg x ${addSet[2]} pow.`;
   }
 
-  // zakończ trening
   if (cmd.startsWith("zakoncz") || cmd.startsWith("koniec") || cmd === "finish") {
     return "Trening zakonczony.";
   }
 
-  // pokaż progres
   if (cmd.startsWith("pokaz") || cmd.startsWith("pokaż")) {
     setView("progress");
     return "Przelaczam na progres.";
   }
 
-  // nawigacja
   if (cmd === "kalendarz") { setView("calendar"); return "Kalendarz"; }
   if (cmd === "rutyny") { setView("routines"); return "Rutyny"; }
   if (cmd === "dashboard") { setView("dashboard"); return "Dashboard"; }
   if (cmd === "cwiczenia") { setView("exercises"); return "Cwiczenia"; }
   if (cmd === "ustawienia") { setView("settings"); return "Ustawienia"; }
 
-  // nowa rutyne
   const newRoutine = cmd.match(/^nowa rutyne(?: (.+))?/);
   if (newRoutine) {
     const name = newRoutine[1]?.trim() ?? "Nowa Rutyne";
@@ -99,9 +93,10 @@ function parseCommand(
 }
 
 export default function AiPanel({ exercises, setExercises, routines, setRoutines, setView }: Props) {
+  const { t } = useI18n();
   const [input, setInput] = useState("");
   const [log, setLog] = useState<AiMsg[]>([
-    { role: "system", text: "Wpisz komende — np. `dodaj ćwiczenie Farmer Walk legs` lub `nowy trening`" },
+    { role: "system", text: t("ai.initialMessage") },
   ]);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -124,29 +119,29 @@ export default function AiPanel({ exercises, setExercises, routines, setRoutines
   return (
     <div className="shrink-0" style={{ borderTop: `1px solid ${C.border}`, background: C.surface }}>
       {open && (
-        <div ref={logRef} className="px-4 py-2 max-h-40 overflow-y-auto slide-up">
+        <div ref={logRef} className="px-3 md:px-4 py-2 max-h-32 md:max-h-40 overflow-y-auto slide-up">
           {log.map((m, i) => (
-            <div key={i} className="font-mono text-xs leading-relaxed whitespace-pre-wrap"
+            <div key={i} className="font-mono text-[10px] md:text-xs leading-relaxed whitespace-pre-wrap"
               style={{ color: m.role === "user" ? C.cyan : C.muted }}>
               {m.role === "user" ? `> ${m.text}` : m.text}
             </div>
           ))}
         </div>
       )}
-      <form onSubmit={submit} className="flex items-center gap-2 px-4 h-10">
+      <form onSubmit={submit} className="flex items-center gap-2 px-3 md:px-4 h-10 md:h-11">
         <button type="button" onClick={() => { setOpen((o) => !o); setTimeout(() => inputRef.current?.focus(), 50); }}
-          className="font-mono text-xs shrink-0 transition-all"
+          className="font-mono text-[10px] md:text-xs shrink-0 transition-all"
           style={{ color: C.orange }}>
           {open ? "▼" : "▲"} AI
         </button>
-        <span className="font-mono text-xs" style={{ color: C.muted }}>$</span>
+        <span className="font-mono text-[10px] md:text-xs" style={{ color: C.muted }}>$</span>
         <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
           onFocus={() => setOpen(true)}
-          placeholder="dodaj ćwiczenie / nowy trening / zakoncz trening..."
-          className="flex-1 bg-transparent font-mono text-xs outline-none"
+          placeholder={t("ai.placeholder")}
+          className="flex-1 bg-transparent font-mono text-[10px] md:text-xs outline-none min-w-0"
           style={{ color: C.text }}
         />
-        <button type="submit" className="font-mono text-xs px-2 py-0.5 shrink-0"
+        <button type="submit" className="font-mono text-[10px] md:text-xs px-2 py-0.5 shrink-0"
           style={{ background: C.orange, color: "#fff" }}>&#8629;</button>
       </form>
     </div>

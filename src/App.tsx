@@ -62,6 +62,7 @@ export default function App() {
   const [view, setView] = useState<View>("dashboard");
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [recoveryMode, setRecoveryMode] = useState(false);
   const [state, setStateRaw] = useState<AppState>(() => {
     const saved = loadState();
     if (saved) {
@@ -91,9 +92,15 @@ export default function App() {
     });
 
     const { data: { subscription } } = supabase?.auth.onAuthStateChange(
-      (_event, s) => {
+      (event, s) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setRecoveryMode(true);
+          setAuthLoading(false);
+          return;
+        }
         setSession(s);
         if (s?.user) {
+          setRecoveryMode(false);
           setStateRaw((prev) => ({
             ...prev,
             user: { email: s.user.email ?? "", id: s.user.id },
@@ -122,6 +129,11 @@ export default function App() {
       saveState(state);
     }
   }, [state.activeWorkout]);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.dataset.theme = state.settings.theme;
+  }, [state.settings.theme]);
 
   function startWorkout(r: Routine) {
     setState((s) => ({
@@ -193,6 +205,7 @@ export default function App() {
         setView={setView}
         authed={authed}
         authLoading={authLoading}
+        recoveryMode={recoveryMode}
         onLogin={(email) => {
           // Session listener handles setting user
           if (!isSupabaseConfigured()) {
@@ -214,6 +227,7 @@ function AppContent({
   setView,
   authed,
   authLoading,
+  recoveryMode,
   onLogin,
   onLogout,
   startWorkout,
@@ -225,6 +239,7 @@ function AppContent({
   setView: (v: View) => void;
   authed: boolean;
   authLoading: boolean;
+  recoveryMode: boolean;
   onLogin: (email: string) => void;
   onLogout: () => void;
   startWorkout: (r: Routine) => void;
@@ -238,14 +253,14 @@ function AppContent({
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4"
             style={{ borderColor: C.orange, borderTopColor: "transparent" }} />
-          <p className="font-mono text-xs" style={{ color: C.muted }}>LADOWANIE...</p>
+          <p className="font-mono text-xs" style={{ color: C.muted }}>{t("common.loading")}</p>
         </div>
       </div>
     );
   }
 
   if (!authed) {
-    return <Login onLogin={onLogin} />;
+    return <Login onLogin={onLogin} recoveryMode={recoveryMode} />;
   }
 
   return (
@@ -290,7 +305,7 @@ function AppContent({
         {view === "settings" && (
           <SettingsView settings={state.settings} userEmail={state.user?.email ?? ""}
             onUpdate={(fn) => setState((s) => ({ ...s, settings: fn(s.settings) }))}
-            onLogout={onLogout} />
+            onLogout={onLogout} onDeleteAccount={onLogout} />
         )}
       </AppShell>
 
@@ -310,19 +325,19 @@ function AiView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-6 py-8">
-        <h1 className="font-display font-black text-4xl tracking-tight mb-4" style={{ color: C.text }}>
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-5 md:py-8 pb-24 md:pb-8">
+        <h1 className="font-display font-black text-2xl md:text-4xl tracking-tight mb-3 md:mb-4" style={{ color: C.text }}>
           {t("ai.title")}
         </h1>
-        <p className="font-mono text-xs mb-6" style={{ color: C.muted }}>
+        <p className="font-mono text-[10px] md:text-xs mb-5 md:mb-6" style={{ color: C.muted }}>
           {t("ai.description")}
         </p>
 
-        <div className="p-5 mb-6" style={{ background: C.card, borderLeft: `3px solid ${C.violet}` }}>
-          <div className="font-display font-bold text-xs tracking-widest mb-3" style={{ color: C.violet }}>
+        <div className="p-4 md:p-5 mb-5 md:mb-6" style={{ background: C.card, borderLeft: `3px solid ${C.violet}` }}>
+          <div className="font-display font-bold text-[10px] md:text-xs tracking-widest mb-2.5 md:mb-3" style={{ color: C.violet }}>
             {t("ai.availableCommands")}
           </div>
-          <div className="space-y-2 font-mono text-xs" style={{ color: C.muted }}>
+          <div className="space-y-2 font-mono text-[10px] md:text-xs" style={{ color: C.muted }}>
             <div><span style={{ color: C.orange }}>dodaj cwiczenie</span> [nazwa] [push|pull|legs|core]</div>
             <div><span style={{ color: C.orange }}>nowy trening</span> [nazwa rutyny]</div>
             <div><span style={{ color: C.orange }}>dodaj serie</span> [kg]x[reps]</div>

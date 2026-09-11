@@ -3,14 +3,14 @@ import { C } from "./lib/constants";
 import type { View } from "./types";
 import { useI18n } from "./i18n";
 
-const NAV_KEYS: { key: string; view: View }[] = [
-  { key: "nav.dashboard", view: "dashboard" },
-  { key: "nav.exercises", view: "exercises" },
-  { key: "nav.routines", view: "routines" },
-  { key: "nav.calendar", view: "calendar" },
-  { key: "nav.progress", view: "progress" },
-  { key: "nav.ai", view: "ai" },
-  { key: "nav.settings", view: "settings" },
+const NAV_KEYS: { key: string; view: View; icon: string }[] = [
+  { key: "nav.dashboard", view: "dashboard", icon: "⌂" },
+  { key: "nav.exercises", view: "exercises", icon: "◈" },
+  { key: "nav.routines", view: "routines", icon: "☰" },
+  { key: "nav.calendar", view: "calendar", icon: "▦" },
+  { key: "nav.progress", view: "progress", icon: "▲" },
+  { key: "nav.ai", view: "ai", icon: "✦" },
+  { key: "nav.settings", view: "settings", icon: "⚙" },
 ];
 
 export default function AppShell({
@@ -29,9 +29,10 @@ export default function AppShell({
   const { t } = useI18n();
 
   return (
-    <div className="h-full flex" style={{ background: C.bg }}>
+    <div className="flex-1 min-h-0 flex flex-col md:flex-row" style={{ background: C.bg }}>
+      {/* Desktop sidebar - hidden on mobile */}
       <aside
-        className="w-56 shrink-0 flex flex-col"
+        className="hidden md:flex w-56 shrink-0 flex-col"
         style={{ background: C.surface, borderRight: `1px solid ${C.border}` }}
       >
         <div className="px-4 py-3">
@@ -77,9 +78,52 @@ export default function AppShell({
           {t("nav.logout")}
         </button>
       </aside>
-      <main className="flex-1 min-h-0 flex flex-col">
+
+      {/* Main content */}
+      <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
       </main>
+
+      {/* Mobile bottom tab bar - hidden on desktop */}
+      <nav
+        className="md:hidden shrink-0 flex items-stretch border-t safe-area-bottom"
+        style={{ background: C.surface, borderColor: C.border }}
+      >
+        {NAV_KEYS.map((item) => (
+          <button
+            key={item.view}
+            onClick={() => setView(item.view)}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all"
+            style={{
+              color: view === item.view ? C.orange : C.muted,
+              minHeight: "60px",
+            }}
+          >
+            <span className="text-lg leading-none mb-1">{item.icon}</span>
+            <span className="font-display font-bold text-[9px] tracking-widest leading-none">
+              {t(item.key).length > 8 ? t(item.key).slice(0, 7) + "." : t(item.key)}
+            </span>
+            {view === item.view && (
+              <span className="w-1 h-1 rounded-full mt-1" style={{ background: C.orange }} />
+            )}
+          </button>
+        ))}
+        {hasActive && (
+          <button
+            onClick={() => setView("workout")}
+            className="flex-1 flex flex-col items-center justify-center py-2 transition-all relative"
+            style={{
+              color: view === "workout" ? C.cyan : C.muted,
+              minHeight: "60px",
+            }}
+          >
+            <span className="w-2 h-2 rounded-full pulse-dot mb-1" style={{ background: C.cyan }} />
+            <span className="font-display font-bold text-[9px] tracking-widest leading-none">
+              {t("nav.workout")}
+            </span>
+          </button>
+        )}
+      </nav>
     </div>
   );
 }

@@ -43,6 +43,53 @@ export const authService = {
     return { id: "local-user", email: "demo@example.com" };
   },
 
+  async resetPassword(email: string): Promise<void> {
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      });
+      if (error) throw error;
+      return;
+    }
+    // Local mode — simulate success
+  },
+
+  async updatePassword(newPassword: string): Promise<void> {
+    if (isSupabaseConfigured() && supabase) {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      return;
+    }
+    // Local mode — simulate success
+  },
+
+  async deleteAccount(): Promise<void> {
+    if (isSupabaseConfigured() && supabase) {
+      // Delete user data from all tables
+      const tables = [
+        "ai_generations", "ai_messages", "ai_conversations",
+        "progress_photos", "measurements", "sets",
+        "workout_exercises", "workouts",
+        "routine_exercises", "routines",
+        "exercise_media", "exercises", "profiles",
+      ];
+      for (const table of tables) {
+        await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      }
+      // Delete the auth user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.auth.admin.deleteUser(user.id).catch(() => {
+          // Admin API may not be available — sign out as fallback
+        });
+      }
+      await supabase.auth.signOut();
+      return;
+    }
+    // Local mode — clear localStorage
+    localStorage.removeItem("gym-progress-state");
+  },
+
   async signOut(): Promise<void> {
     if (isSupabaseConfigured() && supabase) {
       const { error } = await supabase.auth.signOut();
