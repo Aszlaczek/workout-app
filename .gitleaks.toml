@@ -6,16 +6,18 @@
     '''tests/''',
     '''docs/''',
     '''Agents/''',
-    '''*.test.ts''',
-    '''*.spec.ts''',
+    '''.*\.test\.ts''',
+    '''.*\.spec\.ts''',
     '''__tests__/''',
-    '''*.test.tsx''',
-    '''*.spec.tsx''',
+    '''.*\.test\.tsx''',
+    '''.*\.spec\.tsx''',
     '''.env.example''',
     '''.env.local''',
     '''.gitleaks.toml''',
     '''src/services/ai/__tests__/''',
   ]
+
+
 
 [[rules]]
   id = "supabase-service-role"
