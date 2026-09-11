@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { DEFAULT_SETTINGS } from "./data/seed";
 import type { Exercise, Routine, Workout, ActiveWorkout, Settings, View } from "./types";
 import { mkId } from "./lib/utils";
@@ -197,26 +198,29 @@ export default function App() {
   }, [setState]);
 
   return (
-    <I18nProvider settings={state.settings}>
-      <AppContent
-        state={state}
-        setState={setState}
-        view={view}
-        setView={setView}
-        authed={authed}
-        authLoading={authLoading}
-        recoveryMode={recoveryMode}
-        onLogin={(email) => {
-          // Session listener handles setting user
-          if (!isSupabaseConfigured()) {
-            setStateRaw((s) => ({ ...s, user: { email, id: "local-user" } }));
-          }
-        }}
-        onLogout={handleLogout}
-        startWorkout={startWorkout}
-        finishWorkout={finishWorkout}
-      />
-    </I18nProvider>
+    <>
+      <I18nProvider settings={state.settings}>
+        <AppContent
+          state={state}
+          setState={setState}
+          view={view}
+          setView={setView}
+          authed={authed}
+          authLoading={authLoading}
+          recoveryMode={recoveryMode}
+          onLogin={(email) => {
+            // Session listener handles setting user
+            if (!isSupabaseConfigured()) {
+              setStateRaw((s) => ({ ...s, user: { email, id: "local-user" } }));
+            }
+          }}
+          onLogout={handleLogout}
+          startWorkout={startWorkout}
+          finishWorkout={finishWorkout}
+        />
+      </I18nProvider>
+      <Analytics />
+    </>
   );
 }
 
