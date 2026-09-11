@@ -1,0 +1,48 @@
+# Gitleaks configuration — secrets scanning
+
+[allowlist]
+  description = "Allow test files, docs, and example files"
+  paths = [
+    '''tests/''',
+    '''docs/''',
+    '''Agents/''',
+    '''*.test.ts''',
+    '''*.spec.ts''',
+    '''__tests__/''',
+    '''*.test.tsx''',
+    '''*.spec.tsx''',
+    '''.env.example''',
+    '''.env.local''',
+    '''.gitleaks.toml''',
+    '''src/services/ai/__tests__/''',
+  ]
+
+[[rules]]
+  id = "supabase-service-role"
+  description = "Supabase service role key"
+  regex = '''eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+'''
+  tags = ["key", "supabase"]
+
+[[rules]]
+  id = "openai-api-key"
+  description = "OpenAI API key"
+  regex = '''sk-[a-zA-Z0-9]{48}'''
+  tags = ["key", "openai"]
+
+[[rules]]
+  id = "generic-api-key"
+  description = "Generic API key"
+  regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)[\s]*[:=][\s]*['"]?([a-zA-Z0-9_\-]{20,})['"]?'''
+  tags = ["key", "generic"]
+
+[[rules]]
+  id = "generic-secret"
+  description = "Generic secret"
+  regex = '''(?i)(secret|password|token|credential)[\s]*[:=][\s]*['"]?([a-zA-Z0-9_\-]{16,})['"]?'''
+  tags = ["secret", "generic"]
+
+[[rules]]
+  id = "private-key"
+  description = "Private key"
+  regex = '''-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'''
+  tags = ["key", "private"]
