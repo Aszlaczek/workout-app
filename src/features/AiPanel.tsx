@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { C } from "../lib/constants";
 import { useI18n } from "../i18n";
 import { mkId } from "../lib/utils";
-import type { Exercise, Routine, RoutineExercise, View } from "../types";
+import type { Exercise, Routine, View } from "../types";
 
 type AiMsg = { role: "user" | "system"; text: string };
 

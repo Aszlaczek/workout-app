@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { C } from "../lib/constants";
 import { useI18n } from "../i18n";
 import { exName, mkId, formatDuration } from "../lib/utils";
@@ -41,6 +41,13 @@ export default function WorkoutLogger({ active, onUpdate, onFinish, exercises }:
     return () => clearInterval(i);
   }, [timer.running]);
 
+  const toggleRestTimer = useCallback(() => {
+    setTimer((prev) => {
+      if (prev.running) return { ...prev, running: false };
+      return { ...prev, running: true, remaining: prev.duration };
+    });
+  }, []);
+
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.code === "Space" && e.target === document.body) {
@@ -50,8 +57,7 @@ export default function WorkoutLogger({ active, onUpdate, onFinish, exercises }:
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toggleRestTimer]);
 
   const totalDone = active.exercises.reduce((s, e) => s + e.sets.filter((x) => x.done).length, 0);
 
@@ -78,13 +84,6 @@ export default function WorkoutLogger({ active, onUpdate, onFinish, exercises }:
     const n = structuredClone(active);
     n.exercises[ei].sets.splice(si, 1);
     onUpdate(n);
-  }
-
-  function toggleRestTimer() {
-    setTimer((prev) => {
-      if (prev.running) return { ...prev, running: false };
-      return { ...prev, running: true, remaining: prev.duration };
-    });
   }
 
   function setRestDuration(d: number) {
@@ -157,7 +156,7 @@ export default function WorkoutLogger({ active, onUpdate, onFinish, exercises }:
                   {exName(e.exerciseId, exercises)}
                 </div>
                 <div className="font-mono text-[10px] md:text-xs mt-1 break-all" style={{ color: C.muted }}>
-                  {e.sets.map((s, si) => `${s.weight}x${s.reps}`).join(" · ")}
+                  {e.sets.map((s, _si) => `${s.weight}x${s.reps}`).join(" · ")}
                 </div>
               </div>
             ))}

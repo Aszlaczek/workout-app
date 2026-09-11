@@ -10,6 +10,21 @@ type CardProps = {
 };
 
 export default function Card({ children, className = "", borderLeft, borderTop, onClick }: CardProps) {
+  if (onClick) {
+    return (
+      <button
+        className={`p-3 md:p-4 ${className}`}
+        style={{
+          background: C.card,
+          borderLeft: borderLeft ? `3px solid ${borderLeft}` : undefined,
+          borderTop: borderTop ? `2px solid ${borderTop}` : undefined,
+        }}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    );
+  }
   return (
     <div
       className={`p-3 md:p-4 ${className}`}
@@ -18,7 +33,6 @@ export default function Card({ children, className = "", borderLeft, borderTop, 
         borderLeft: borderLeft ? `3px solid ${borderLeft}` : undefined,
         borderTop: borderTop ? `2px solid ${borderTop}` : undefined,
       }}
-      onClick={onClick}
     >
       {children}
     </div>

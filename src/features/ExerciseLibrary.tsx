@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { C } from "../lib/constants";
 import { useI18n } from "../i18n";
-import { exName, mkId } from "../lib/utils";
+import { mkId } from "../lib/utils";
 import type { Exercise } from "../types";
 
 type Props = {
@@ -177,7 +177,7 @@ export default function ExerciseLibrary({ exercises, setExercises }: Props) {
         {/* Exercise cards - single column mobile, 2 cols desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
           {filtered.map((ex) => (
-            <button key={ex.id} onClick={() => setSelected(ex)}
+            <button key={ex.id} onClick={() => setSelected(ex)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(ex); }}
               className="p-3 md:p-4 text-left transition-all"
               style={{ background: C.card, border: `1px solid ${C.border}`, borderLeft: `3px solid ${ex.category === "push" ? C.orange : ex.category === "pull" ? C.violet : ex.category === "legs" ? C.cyan : C.green}` }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.orange)}
@@ -217,10 +217,12 @@ export default function ExerciseLibrary({ exercises, setExercises }: Props) {
 
         {/* Detail modal - fullscreen on mobile */}
         {selected && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4 fade-in"
+          <button className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4 fade-in"
             style={{ background: "var(--color-overlay)" }}
-            onClick={() => setSelected(null)}>
-            <div className="w-full md:max-w-lg md:p-6 slide-up rounded-t-xl md:rounded-none" onClick={(e) => e.stopPropagation()}
+            onClick={() => setSelected(null)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setSelected(null); }}
+            aria-label="Close exercise details">
+            <div className="w-full md:max-w-lg md:p-6 slide-up rounded-t-xl md:rounded-none" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="button" tabIndex={0}
               style={{ background: C.card, borderTop: `3px solid ${C.orange}`, maxHeight: "90vh", overflowY: "auto" }}>
               <div className="p-4 md:p-0 md:mb-4">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
@@ -284,7 +286,7 @@ export default function ExerciseLibrary({ exercises, setExercises }: Props) {
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         )}
       </div>
     </div>

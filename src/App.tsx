@@ -43,7 +43,7 @@ function loadState(): Partial<AppState> | null {
 function saveState(state: AppState) {
   try {
     // Only save non-user data to localStorage
-    const { user, ...rest } = state;
+    const { user: _user, ...rest } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
   } catch {
     // ignore
@@ -116,20 +116,20 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  function setState(fn: (s: AppState) => AppState) {
+  const setState = useCallback((fn: (s: AppState) => AppState) => {
     setStateRaw((s) => {
       const next = fn(s);
       saveState(next);
       return next;
     });
-  }
+  }, []);
 
   // Save active workout to state
   useEffect(() => {
     if (state.activeWorkout) {
       saveState(state);
     }
-  }, [state.activeWorkout]);
+  }, [state.activeWorkout, state]);
 
   // Apply theme to document
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function App() {
     setView("workout");
   }
 
-  function startEmptyWorkout() {
+  function _startEmptyWorkout() {
     setState((s) => ({
       ...s,
       activeWorkout: {

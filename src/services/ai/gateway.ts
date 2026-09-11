@@ -33,7 +33,7 @@ import {
   analyzeProgressParamsSchema,
   suggestProgressionParamsSchema,
 } from "./schemas";
-import { AI_TOOLS, getToolByName } from "./tools";
+import { AI_TOOLS } from "./tools";
 
 // ============================================================
 // Gateway Configuration
@@ -49,17 +49,17 @@ export interface GatewayConfig {
 // Tool Execution
 // ============================================================
 
-async function executeTool(
+async function _executeTool(
   toolName: string,
   args: Record<string, unknown>,
-  context: {
+  _context: {
     userId: string;
     supabaseClient: unknown;
   }
 ): Promise<unknown> {
   switch (toolName) {
     case "search_exercises": {
-      const params = searchExercisesParamsSchema.parse(args);
+      const _params = searchExercisesParamsSchema.parse(args);
       // Query exercises from database
       // Return matching exercises
       return { exercises: [], total: 0 };
@@ -118,7 +118,7 @@ export async function handleChat(params: {
   temperature?: number;
   provider: AIProvider;
 }): Promise<AIResponse> {
-  const { messages, userId, model, temperature, provider } = params;
+  const { messages, userId: _userId, model, temperature, provider } = params;
 
   // Add system prompt if not present
   const systemMessage: AIMessage = {
@@ -264,7 +264,7 @@ export class MockAIProvider implements AIProvider {
 
   async generateExerciseDraft(
     prompt: string,
-    context?: ExerciseContext
+    _context?: ExerciseContext
   ): Promise<ExerciseDraft> {
     return {
       name: "AI Generated Exercise",
@@ -279,7 +279,7 @@ export class MockAIProvider implements AIProvider {
 
   async generateRoutineDraft(
     prompt: string,
-    context?: RoutineContext
+    _context?: RoutineContext
   ): Promise<RoutineDraft> {
     return {
       name: "AI Generated Routine",

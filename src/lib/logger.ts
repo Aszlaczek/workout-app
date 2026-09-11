@@ -32,7 +32,7 @@ export interface AIAuditEntry {
   confirmedBy: "user";
 }
 
-const SERVICE_NAME = "gym-progress";
+const _SERVICE_NAME = "gym-progress";
 
 /**
  * Core logging function
