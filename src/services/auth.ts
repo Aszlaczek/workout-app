@@ -65,6 +65,9 @@ export const authService = {
 
   async deleteAccount(): Promise<void> {
     if (isSupabaseConfigured() && supabase) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       // Delete user data from all tables
       const tables = [
         "ai_generations", "ai_messages", "ai_conversations",
@@ -74,15 +77,15 @@ export const authService = {
         "exercise_media", "exercises", "profiles",
       ];
       for (const table of tables) {
-        await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabase.from(table).delete().eq("user_id", user.id);
       }
-      // Delete the auth user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.auth.admin.deleteUser(user.id).catch(() => {
-          // Admin API may not be available — sign out as fallback
-        });
+
+      // Call Edge Function to delete the auth user securely
+      const { error } = await supabase.functions.invoke("delete-user");
+      if (error) {
+        console.error("Server-side deletion failed:", error.message);
       }
+
       await supabase.auth.signOut();
       return;
     }
