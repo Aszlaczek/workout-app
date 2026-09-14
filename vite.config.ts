@@ -5,6 +5,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  envPrefix: "SUPABASE_",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

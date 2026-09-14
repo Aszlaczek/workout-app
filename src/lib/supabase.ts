@@ -5,7 +5,7 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
-    "Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY — running in localStorage mode"
+    "Missing SUPABASE_URL or SUPABASE_ANON_KEY — running in localStorage mode"
   );
 }
 
