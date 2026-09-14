@@ -11,9 +11,14 @@ async function listLocal(): Promise<Exercise[]> {
 
 async function listRemote(): Promise<Exercise[]> {
   if (!supabase) return listLocal();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+
   const { data, error } = await supabase
     .from("exercises")
     .select("*")
+    .or(`user_id.eq.${userId},user_id.is.null`)
     .order("name");
   if (error) throw error;
   return (data ?? []).map((e: Record<string, unknown>) => ({
@@ -41,6 +46,7 @@ export const exerciseService = {
 
   async create(exercise: Exercise): Promise<Exercise[]> {
     if (isSupabaseConfigured() && supabase) {
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase.from("exercises").insert({
         id: exercise.id,
         name: exercise.name,
@@ -50,6 +56,7 @@ export const exerciseService = {
         instructions: exercise.instructions,
         difficulty: exercise.difficulty,
         is_custom: exercise.isCustom ?? false,
+        user_id: user?.id ?? null,
       });
       if (error) throw error;
       return this.list();
@@ -95,10 +102,13 @@ export const exerciseService = {
 
   async search(query: string): Promise<Exercise[]> {
     if (isSupabaseConfigured() && supabase) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
       const { data, error } = await supabase
         .from("exercises")
         .select("*")
         .or(`name.ilike.%${query}%,muscle.ilike.%${query}%`)
+        .or(`user_id.eq.${userId},user_id.is.null`)
         .order("name");
       if (error) throw error;
       return (data ?? []).map((e: Record<string, unknown>) => ({
