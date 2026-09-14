@@ -15,6 +15,7 @@
 -- ============================================================
 
 -- EXERCISE MEDIA (private bucket)
+DROP POLICY IF EXISTS "Users can view exercise media" ON storage.objects;
 CREATE POLICY "Users can view exercise media"
   ON storage.objects FOR SELECT
   USING (
@@ -36,6 +37,7 @@ CREATE POLICY "Users can view exercise media"
     )
   );
 
+DROP POLICY IF EXISTS "Users can upload exercise media" ON storage.objects;
 CREATE POLICY "Users can upload exercise media"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -47,6 +49,7 @@ CREATE POLICY "Users can upload exercise media"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own exercise media" ON storage.objects;
 CREATE POLICY "Users can delete own exercise media"
   ON storage.objects FOR DELETE
   USING (
@@ -59,6 +62,7 @@ CREATE POLICY "Users can delete own exercise media"
   );
 
 -- PROGRESS PHOTOS (private bucket)
+DROP POLICY IF EXISTS "Users can view own progress photos" ON storage.objects;
 CREATE POLICY "Users can view own progress photos"
   ON storage.objects FOR SELECT
   USING (
@@ -66,6 +70,7 @@ CREATE POLICY "Users can view own progress photos"
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "Users can upload own progress photos" ON storage.objects;
 CREATE POLICY "Users can upload own progress photos"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -73,6 +78,7 @@ CREATE POLICY "Users can upload own progress photos"
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "Users can delete own progress photos" ON storage.objects;
 CREATE POLICY "Users can delete own progress photos"
   ON storage.objects FOR DELETE
   USING (
@@ -81,10 +87,12 @@ CREATE POLICY "Users can delete own progress photos"
   );
 
 -- AVATARS (public bucket)
+DROP POLICY IF EXISTS "Anyone can view avatars" ON storage.objects;
 CREATE POLICY "Anyone can view avatars"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
 CREATE POLICY "Users can upload own avatar"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -92,6 +100,7 @@ CREATE POLICY "Users can upload own avatar"
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
 CREATE POLICY "Users can update own avatar"
   ON storage.objects FOR UPDATE
   USING (
@@ -99,6 +108,7 @@ CREATE POLICY "Users can update own avatar"
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
 CREATE POLICY "Users can delete own avatar"
   ON storage.objects FOR DELETE
   USING (
