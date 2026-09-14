@@ -15,11 +15,17 @@ async function listRemote(): Promise<Exercise[]> {
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercises")
-    .select("*")
-    .or(`user_id.eq.${userId},user_id.is.null`)
-    .order("name");
+    .select("*");
+
+  if (userId) {
+    query = query.or(`user_id.eq.${userId},user_id.is.null`);
+  } else {
+    query = query.eq("user_id", null); // Only show global exercises if not logged in
+  }
+
+  const { data, error } = await query.order("name");
   if (error) throw error;
   return (data ?? []).map((e: Record<string, unknown>) => ({
     id: e.id as string,
@@ -104,12 +110,19 @@ export const exerciseService = {
     if (isSupabaseConfigured() && supabase) {
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id;
-      const { data, error } = await supabase
+      
+      let request = supabase
         .from("exercises")
         .select("*")
-        .or(`name.ilike.%${query}%,muscle.ilike.%${query}%`)
-        .or(`user_id.eq.${userId},user_id.is.null`)
-        .order("name");
+        .or(`name.ilike.%${query}%,muscle.ilike.%${query}%`);
+
+      if (userId) {
+        request = request.or(`user_id.eq.${userId},user_id.is.null`);
+      } else {
+        request = request.eq("user_id", null);
+      }
+
+      const { data, error } = await request.order("name");
       if (error) throw error;
       return (data ?? []).map((e: Record<string, unknown>) => ({
         id: e.id as string,
