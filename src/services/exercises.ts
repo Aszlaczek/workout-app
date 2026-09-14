@@ -20,9 +20,9 @@ async function listRemote(): Promise<Exercise[]> {
     .select("*");
 
   if (userId) {
-    query = query.or(`user_id.eq.${userId},user_id.is.null`);
+    query = query.or(`owner_id.eq.${userId},owner_id.is.null`);
   } else {
-    query = query.eq("user_id", null); // Only show global exercises if not logged in
+    query = query.eq("owner_id", null); // Only show global exercises if not logged in
   }
 
   const { data, error } = await query.order("name");
